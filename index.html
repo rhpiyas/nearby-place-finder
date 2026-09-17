@@ -18,7 +18,10 @@
             <h1 id="welcome-heading">Find nearby places</h1>
             <p>Explore useful places around your current location.</p>
 
-            <button id="use-location-button" type="button">Use My Location</button>
+            <div class="location-action-row">
+                <button id="use-location-button" type="button">Use My Location</button>
+                <span id="current-location" aria-live="polite">Location not selected</span>
+            </div>
 
             <form id="place-search-form" role="search">
                 <label for="place-search">Search nearby places</label>
@@ -50,6 +53,7 @@
 
     <footer>
         <p>&copy; 2026 Ashepashe</p>
+        <p>Place names powered by <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>.</p>
     </footer>
     <script src="index.js"></script>
 </body>

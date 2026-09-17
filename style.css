@@ -113,6 +113,18 @@ button:focus-visible, input:focus-visible {
     outline-offset: 3px;
 }
 
+.location-action-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+#current-location {
+    color: var(--muted);
+    font-size: .82rem;
+}
+
 #place-search-form {
     display: grid;
     grid-template-columns: 1fr auto;
