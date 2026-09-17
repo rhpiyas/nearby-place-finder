@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Discover useful places around you with Ashepashe.">
+    <title>Ashepashe | Nearby Place Finder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <a href="/" aria-label="Ashepashe home">Ashepashe</a>
+        <p>Discover what's around you.</p>
+    </header>
+
+    <main>
+        <section aria-labelledby="welcome-heading">
+            <h1 id="welcome-heading">Find nearby places</h1>
+            <p>Explore useful places around your current location.</p>
+
+            <button id="use-location-button" type="button">Use My Location</button>
+
+            <form id="place-search-form" role="search">
+                <label for="place-search">Search nearby places</label>
+                <input id="place-search" name="place" type="search" placeholder="Try pizza, coffee, or pharmacy">
+                <button type="submit">Search</button>
+            </form>
+        </section>
+
+        <nav aria-label="Place categories">
+            <h2>Categories</h2>
+            <ul>
+                <li><button type="button" data-category="restaurant">Restaurants</button></li>
+                <li><button type="button" data-category="cafe">Cafes</button></li>
+                <li><button type="button" data-category="hospital">Hospitals</button></li>
+                <li><button type="button" data-category="pharmacy">Pharmacies</button></li>
+                <li><button type="button" data-category="hotel">Hotels</button></li>
+                <li><button type="button" data-category="university">Universities</button></li>
+                <li><button type="button" data-category="atm">ATMs</button></li>
+                <li><button type="button" data-category="supermarket">Supermarkets</button></li>
+            </ul>
+        </nav>
+
+        <section aria-labelledby="results-heading">
+            <h2 id="results-heading">Nearby places</h2>
+            <p id="status-message">Allow location access to discover nearby places.</p>
+            <div id="places-list" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Ashepashe</p>
+    </footer>
+    <script src="index.js"></script>
+</body>
+</html>

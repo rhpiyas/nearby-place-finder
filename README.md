@@ -1,1 +1,1 @@
-## Nearby Place Finder : AshePashe
+## Nearby Place Finder: AshePashe
