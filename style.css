@@ -421,6 +421,7 @@ main > .result-filters h2 { margin-bottom: 12px; }
 .place-card {
     display: grid;
     grid-template-rows:
+        var(--place-favorite-height, auto)
         var(--place-name-height, auto)
         var(--place-category-height, auto)
         var(--place-address-height, auto)
@@ -443,6 +444,17 @@ main > .result-filters h2 { margin-bottom: 12px; }
     margin: 0;
     color: var(--ink);
     font-size: 1rem;
+}
+
+.place-card .favorite-button {
+    position: static;
+    grid-column: 1 / -1;
+    justify-self: end;
+    width: fit-content;
+    min-width: 0;
+    margin: 0;
+    padding: 8px 10px;
+    white-space: nowrap;
 }
 
 .place-category {
@@ -495,14 +507,14 @@ main > .result-filters h2 { margin-bottom: 12px; }
 .opening-status-dot.is-open { background: #68d391; }
 .opening-status-dot.is-closed { background: #f06b6b; }
 
-.place-card a {
+.place-card .place-map-link {
     align-self: end;
     color: var(--ink);
     font-size: .8rem;
     font-weight: 700;
 }
 
-.place-card a:hover {
+.place-card a.place-map-link:hover {
     color: var(--accent);
 }
 

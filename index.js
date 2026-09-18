@@ -240,15 +240,15 @@ function createPlaceCard(place, category, userLocation) {
 
     card.append(name, type, addressText);
 
-    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-        const distanceText = document.createElement('p');
-        distanceText.className = 'place-distance';
-        distanceText.textContent = `Approximately ${calculateDistanceKm(userLocation, {
+    const distanceText = document.createElement('p');
+    distanceText.className = 'place-distance';
+    distanceText.textContent = Number.isFinite(latitude) && Number.isFinite(longitude)
+        ? `Approximately ${calculateDistanceKm(userLocation, {
             latitude,
             longitude
-        }).toFixed(1)} km away`;
-        card.append(distanceText);
-    }
+        }).toFixed(1)} km away`
+        : 'Distance not found';
+    card.append(distanceText);
 
     const ratingText = document.createElement('p');
     ratingText.className = 'place-detail place-rating';
@@ -278,21 +278,26 @@ function createPlaceCard(place, category, userLocation) {
     openingHoursText.textContent = `Hours: ${properties.opening_hours || 'Information not found'}`;
     card.append(openingHoursText);
 
-    if (latitude !== undefined && longitude !== undefined) {
-        const mapLink = document.createElement('a');
-        mapLink.className = 'place-map-link';
+    const mapLink = Number.isFinite(latitude) && Number.isFinite(longitude)
+        ? document.createElement('a')
+        : document.createElement('span');
+    mapLink.className = 'place-map-link';
+    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
         mapLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=18/${latitude}/${longitude}`;
         mapLink.target = '_blank';
         mapLink.rel = 'noreferrer';
         mapLink.textContent = 'View on map';
-        card.append(mapLink);
+    } else {
+        mapLink.textContent = 'Map information not found';
     }
+    card.append(mapLink);
 
     return card;
 }
 
 function syncCardRowHeights() {
     const rowSelectors = [
+        ['favorite', '.favorite-button'],
         ['name', '.place-name'],
         ['category', '.place-category'],
         ['address', '.place-address'],
