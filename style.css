@@ -283,6 +283,13 @@ nav button[aria-pressed="true"] {
     line-height: 1.45;
 }
 
+.place-card .place-distance {
+    margin-top: -8px;
+    color: var(--accent-soft);
+    font-size: .76rem;
+    font-weight: 700;
+}
+
 .place-card a {
     margin-top: auto;
     color: var(--ink);

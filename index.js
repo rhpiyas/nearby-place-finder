@@ -18,7 +18,27 @@ function getPlaceCoordinates(place) {
     };
 }
 
-function createPlaceCard(place, category) {
+function calculateDistanceKm(firstLocation, secondLocation) {
+    const earthRadiusKm = 6371;
+    const latitudeDifference = (secondLocation.latitude - firstLocation.latitude)
+        * Math.PI / 180;
+    const longitudeDifference = (secondLocation.longitude - firstLocation.longitude)
+        * Math.PI / 180;
+    const firstLatitude = firstLocation.latitude * Math.PI / 180;
+    const secondLatitude = secondLocation.latitude * Math.PI / 180;
+    const haversine = Math.sin(latitudeDifference / 2) ** 2
+        + Math.cos(firstLatitude)
+        * Math.cos(secondLatitude)
+        * Math.sin(longitudeDifference / 2) ** 2;
+    const centralAngle = 2 * Math.atan2(
+        Math.sqrt(haversine),
+        Math.sqrt(1 - haversine)
+    );
+
+    return earthRadiusKm * centralAngle;
+}
+
+function createPlaceCard(place, category, userLocation) {
     const card = document.createElement('article');
     const properties = place.properties || {};
     const { latitude, longitude } = getPlaceCoordinates(place);
@@ -41,6 +61,16 @@ function createPlaceCard(place, category) {
 
     card.append(name, type, addressText);
 
+    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+        const distanceText = document.createElement('p');
+        distanceText.className = 'place-distance';
+        distanceText.textContent = `Approximately ${calculateDistanceKm(userLocation, {
+            latitude,
+            longitude
+        }).toFixed(1)} km away`;
+        card.append(distanceText);
+    }
+
     if (latitude !== undefined && longitude !== undefined) {
         const mapLink = document.createElement('a');
         mapLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=18/${latitude}/${longitude}`;
@@ -53,12 +83,12 @@ function createPlaceCard(place, category) {
     return card;
 }
 
-function renderPlaceCards(places, category) {
+function renderPlaceCards(places, category, userLocation) {
     placesList.replaceChildren();
 
     const fragment = document.createDocumentFragment();
     places.slice(0, 30).forEach((place) => {
-        fragment.append(createPlaceCard(place, category));
+        fragment.append(createPlaceCard(place, category, userLocation));
     });
     placesList.append(fragment);
 }
@@ -79,7 +109,7 @@ async function fetchNearbyPlaces(category) {
         statusMessage.textContent = placeCount
             ? `Found ${placeCount} nearby ${category} places within ${selectedRadiusKm} km.`
             : `No nearby ${category} places found within ${selectedRadiusKm} km.`;
-        renderPlaceCards(places, category);
+        renderPlaceCards(places, category, currentLocation);
     } catch (error) {
         placesList.textContent = '';
         statusMessage.textContent = 'Places could not be loaded. Please try again.';
