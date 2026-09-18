@@ -38,6 +38,23 @@ function calculateDistanceKm(firstLocation, secondLocation) {
     return earthRadiusKm * centralAngle;
 }
 
+function sortPlacesByDistance(places, userLocation) {
+    return places.slice().sort((firstPlace, secondPlace) => {
+        const firstCoordinates = getPlaceCoordinates(firstPlace);
+        const secondCoordinates = getPlaceCoordinates(secondPlace);
+        const firstHasCoordinates = Number.isFinite(firstCoordinates.latitude)
+            && Number.isFinite(firstCoordinates.longitude);
+        const secondHasCoordinates = Number.isFinite(secondCoordinates.latitude)
+            && Number.isFinite(secondCoordinates.longitude);
+
+        if (!firstHasCoordinates) return 1;
+        if (!secondHasCoordinates) return -1;
+
+        return calculateDistanceKm(userLocation, firstCoordinates)
+            - calculateDistanceKm(userLocation, secondCoordinates);
+    });
+}
+
 function createPlaceCard(place, category, userLocation) {
     const card = document.createElement('article');
     const properties = place.properties || {};
@@ -87,7 +104,7 @@ function renderPlaceCards(places, category, userLocation) {
     placesList.replaceChildren();
 
     const fragment = document.createDocumentFragment();
-    places.slice(0, 30).forEach((place) => {
+    sortPlacesByDistance(places, userLocation).slice(0, 30).forEach((place) => {
         fragment.append(createPlaceCard(place, category, userLocation));
     });
     placesList.append(fragment);
