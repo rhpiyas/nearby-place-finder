@@ -55,6 +55,11 @@ function clearSearchResults() {
     });
 }
 
+function setStatus(message, state = 'idle') {
+    statusMessage.textContent = message;
+    statusMessage.dataset.state = state;
+}
+
 function updateFavoritesButton() {
     favoritesCount.textContent = String(getFavorites().length);
     favoritesIcon.textContent = showingFavorites ? '★' : '☆';
@@ -309,6 +314,7 @@ function syncCardRowHeights() {
 
 function renderPlaceCards(places, category, userLocation) {
     placesList.replaceChildren();
+    placesList.dataset.state = places.length ? 'results' : 'empty';
 
     const fragment = document.createDocumentFragment();
     sortPlaces(places, userLocation, selectedFilter).slice(0, 30).forEach((place) => {
@@ -338,8 +344,12 @@ async function fetchNearbyPlaces(category) {
         return;
     }
 
-    statusMessage.textContent = `Finding nearby ${category} places within ${selectedRadiusKm} km...`;
+    setStatus(
+        `Finding nearby ${category} places within ${selectedRadiusKm} km...`,
+        'loading'
+    );
     placesList.textContent = '';
+    placesList.dataset.state = 'loading';
 
     try {
         const places = await requestNearbyPlaces(category, currentLocation, selectedRadiusKm);
@@ -347,13 +357,15 @@ async function fetchNearbyPlaces(category) {
         currentPlacesCategory = category;
         showingFavorites = false;
         const placeCount = places.length;
-        statusMessage.textContent = placeCount
+        setStatus(placeCount
             ? `Found ${placeCount} nearby ${category} places within ${selectedRadiusKm} km.`
-            : `No nearby ${category} places found within ${selectedRadiusKm} km.`;
+            : `No nearby ${category} places found within ${selectedRadiusKm} km.`,
+        placeCount ? 'success' : 'empty');
         renderPlaceCards(places, category, currentLocation);
     } catch (error) {
         placesList.textContent = '';
-        statusMessage.textContent = 'Places could not be loaded. Please try again.';
+        placesList.dataset.state = 'error';
+        setStatus('Places could not be loaded. Please try again.', 'error');
     }
 }
 

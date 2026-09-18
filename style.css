@@ -382,6 +382,29 @@ main > .result-filters h2 { margin-bottom: 12px; }
     font-size: .9rem;
 }
 
+#status-message[data-state="loading"] {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+#status-message[data-state="loading"]::before {
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(217, 238, 224, .3);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    content: "";
+    animation: status-spin .8s linear infinite;
+}
+
+#status-message[data-state="empty"] { color: var(--accent-soft); }
+#status-message[data-state="error"] { color: #f6a0a0; }
+
+@keyframes status-spin {
+    to { transform: rotate(360deg); }
+}
+
 #places-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
