@@ -290,6 +290,29 @@ nav button[aria-pressed="true"] {
     font-weight: 700;
 }
 
+.place-card .place-detail {
+    margin-bottom: 8px;
+    font-size: .78rem;
+}
+
+.place-card .place-opening-status {
+    color: var(--accent-soft);
+    font-weight: 700;
+}
+
+.opening-status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    vertical-align: middle;
+}
+
+.opening-status-dot.is-open { background: #68d391; }
+.opening-status-dot.is-closed { background: #f06b6b; }
+
 .place-card a {
     margin-top: auto;
     color: var(--ink);

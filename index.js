@@ -61,6 +61,54 @@ function calculateDistanceKm(firstLocation, secondLocation) {
     return earthRadiusKm * centralAngle;
 }
 
+function isToday(dayExpression, today) {
+    const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    return dayExpression.split(',').some((dayRange) => {
+        const [startDay, endDay] = dayRange.split('-');
+        const startIndex = days.indexOf(startDay);
+        const endIndex = days.indexOf(endDay || startDay);
+        const todayIndex = days.indexOf(today);
+
+        if (startIndex === -1 || endIndex === -1) return false;
+        return startIndex <= endIndex
+            ? todayIndex >= startIndex && todayIndex <= endIndex
+            : todayIndex >= startIndex || todayIndex <= endIndex;
+    });
+}
+
+function getOpeningStatus(openingHours) {
+    if (!openingHours) return 'Opening information not found';
+    if (openingHours.trim() === '24/7') return 'Open now';
+
+    const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    const today = days[new Date().getDay()];
+    const currentMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+    const todaySchedule = openingHours.split(';').find((schedule) => {
+        const parts = schedule.trim().split(/\s+/, 2);
+        return parts.length === 2 && isToday(parts[0], today);
+    });
+
+    if (!todaySchedule) return 'Closed now';
+
+    const timeExpression = todaySchedule.trim().split(/\s+/, 2)[1];
+    if (/^(off|closed)$/i.test(timeExpression)) return 'Closed now';
+
+    const isOpen = timeExpression.split(',').some((timeRange) => {
+        const [start, end] = timeRange.trim().split('-');
+        const startParts = start?.split(':').map(Number);
+        const endParts = end?.split(':').map(Number);
+        if (startParts?.length !== 2 || endParts?.length !== 2) return false;
+
+        const startMinutes = startParts[0] * 60 + startParts[1];
+        const endMinutes = endParts[0] * 60 + endParts[1];
+        return startMinutes <= endMinutes
+            ? currentMinutes >= startMinutes && currentMinutes <= endMinutes
+            : currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+    });
+
+    return isOpen ? 'Open now' : 'Closed now';
+}
+
 function sortPlacesByDistance(places, userLocation) {
     return places.slice().sort((firstPlace, secondPlace) => {
         const firstCoordinates = getPlaceCoordinates(firstPlace);
@@ -110,6 +158,34 @@ function createPlaceCard(place, category, userLocation) {
         }).toFixed(1)} km away`;
         card.append(distanceText);
     }
+
+    const ratingText = document.createElement('p');
+    ratingText.className = 'place-detail';
+    ratingText.textContent = properties.rating !== undefined
+        ? `Rating: ${properties.rating}`
+        : 'Rating not found';
+    card.append(ratingText);
+
+    const openingStatus = getOpeningStatus(properties.opening_hours);
+    const openingStatusText = document.createElement('p');
+    openingStatusText.className = 'place-detail place-opening-status';
+    const statusDot = document.createElement('span');
+    statusDot.className = 'opening-status-dot';
+    statusDot.classList.add(
+        openingStatus === 'Open now'
+            ? 'is-open'
+            : openingStatus === 'Closed now'
+                ? 'is-closed'
+                : 'is-unknown'
+    );
+    statusDot.setAttribute('aria-hidden', 'true');
+    openingStatusText.append(statusDot, document.createTextNode(openingStatus));
+    card.append(openingStatusText);
+
+    const openingHoursText = document.createElement('p');
+    openingHoursText.className = 'place-detail';
+    openingHoursText.textContent = `Hours: ${properties.opening_hours || 'Information not found'}`;
+    card.append(openingHoursText);
 
     if (latitude !== undefined && longitude !== undefined) {
         const mapLink = document.createElement('a');
