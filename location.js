@@ -35,6 +35,7 @@ async function handleLocationSuccess(position) {
 
     currentLocation = { latitude, longitude, accuracy };
     locationButton.disabled = false;
+    locationButton.classList.add('location-ready');
     locationButton.textContent = 'Location Ready';
     currentLocationElement.textContent = 'Finding place name...';
     statusMessage.textContent = 'Location access granted. Looking up your area...';
@@ -54,6 +55,7 @@ function handleLocationError(error) {
     };
 
     locationButton.disabled = false;
+    locationButton.classList.remove('location-ready');
     locationButton.textContent = 'Use My Location';
     currentLocationElement.textContent = 'Location not selected';
     statusMessage.textContent = messages[error.code] || 'Unable to access your location.';
@@ -66,6 +68,7 @@ function requestLocation() {
     }
 
     locationButton.disabled = true;
+    locationButton.classList.remove('location-ready');
     locationButton.textContent = 'Finding location...';
     currentLocationElement.textContent = 'Reading your coordinates...';
     statusMessage.textContent = 'Finding your location...';

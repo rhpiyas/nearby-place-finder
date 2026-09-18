@@ -113,6 +113,17 @@ button:focus-visible, input:focus-visible {
     outline-offset: 3px;
 }
 
+#use-location-button.location-ready {
+    border-color: #68d391;
+    color: #082015;
+    background: #68d391;
+    box-shadow: 0 8px 20px rgba(104, 211, 145, .2);
+}
+
+#use-location-button.location-ready:hover {
+    background: #82e6a3;
+}
+
 .location-action-row {
     display: flex;
     align-items: center;
