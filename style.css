@@ -108,6 +108,17 @@ button:hover {
     transform: translateY(-2px);
 }
 
+button:disabled {
+    cursor: wait;
+    opacity: .65;
+    transform: none;
+}
+
+button:disabled:hover {
+    background: rgba(5, 20, 16, .92);
+    box-shadow: none;
+}
+
 button:focus-visible, input:focus-visible {
     outline: 3px solid rgba(232, 111, 80, .35);
     outline-offset: 3px;
@@ -235,6 +246,15 @@ main > .search-radius h2 { margin-bottom: 12px; }
     background: var(--accent);
 }
 
+.radius-options button:hover,
+.filter-options button:hover,
+.map-visibility-controls button:hover {
+    border-color: var(--accent);
+    color: var(--surface);
+    background: var(--accent);
+    box-shadow: 0 8px 20px rgba(232, 111, 80, .2);
+}
+
 nav button {
     border-color: var(--border);
     color: var(--ink);
@@ -305,6 +325,26 @@ main > .map-section h2 { margin: 0; }
     border-color: var(--accent);
     color: var(--surface);
     background: var(--accent);
+}
+
+#favorites-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 62px;
+    overflow: visible;
+}
+
+.favorite-icon {
+    color: var(--accent);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+#favorites-button:hover .favorite-icon,
+#favorites-button[aria-pressed="true"] .favorite-icon {
+    color: var(--surface);
 }
 
 #map {
@@ -432,6 +472,10 @@ main > .result-filters h2 { margin-bottom: 12px; }
     color: var(--ink);
     font-size: .8rem;
     font-weight: 700;
+}
+
+.place-card a:hover {
+    color: var(--accent);
 }
 
 .place-card h3,
