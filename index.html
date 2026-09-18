@@ -34,16 +34,6 @@
             </form>
         </section>
 
-        <section class="search-radius" aria-labelledby="radius-heading">
-            <h2 id="radius-heading">Search distance</h2>
-            <div class="radius-options" role="group" aria-label="Search distance">
-                <button type="button" data-radius="1" aria-pressed="false">1 km</button>
-                <button type="button" data-radius="3" aria-pressed="true">3 km</button>
-                <button type="button" data-radius="5" aria-pressed="false">5 km</button>
-                <button type="button" data-radius="10" aria-pressed="false">10 km</button>
-            </div>
-        </section>
-
         <nav aria-label="Place categories">
             <h2>Categories</h2>
             <ul>
@@ -59,14 +49,26 @@
             </ul>
         </nav>
 
-        <section class="result-filters" aria-labelledby="filter-heading">
-            <h2 id="filter-heading">Sort results by</h2>
-            <div class="filter-options" role="group" aria-label="Sort results by">
-                <button type="button" data-filter="distance" aria-pressed="true">Distance</button>
-                <button type="button" data-filter="rating" aria-pressed="false">Rating</button>
-                <button type="button" data-filter="status" aria-pressed="false">Status</button>
-            </div>
-        </section>
+        <div class="search-controls-row">
+            <section class="search-radius" aria-labelledby="radius-heading">
+                <h2 id="radius-heading">Search distance</h2>
+                <div class="radius-options" role="group" aria-label="Search distance">
+                    <button type="button" data-radius="1" aria-pressed="false">1 km</button>
+                    <button type="button" data-radius="3" aria-pressed="true">3 km</button>
+                    <button type="button" data-radius="5" aria-pressed="false">5 km</button>
+                    <button type="button" data-radius="10" aria-pressed="false">10 km</button>
+                </div>
+            </section>
+
+            <section class="result-filters" aria-labelledby="filter-heading">
+                <h2 id="filter-heading">Sort results by</h2>
+                <div class="filter-options" role="group" aria-label="Sort results by">
+                    <button type="button" data-filter="distance" aria-pressed="true">Distance</button>
+                    <button type="button" data-filter="rating" aria-pressed="false">Rating</button>
+                    <button type="button" data-filter="status" aria-pressed="false">Status</button>
+                </div>
+            </section>
+        </div>
 
         <section class="map-section" aria-labelledby="map-heading">
             <div class="map-heading-row">
