@@ -12,6 +12,27 @@ const categoryMap = {
     supermarket: 'commercial.supermarket'
 };
 
+const searchKeywordMap = [
+    { keywords: ['restaurant', 'restaurants', 'food', 'pizza'], category: 'restaurant' },
+    { keywords: ['cafe', 'cafes', 'coffee'], category: 'cafe' },
+    { keywords: ['hospital', 'hospitals'], category: 'hospital' },
+    { keywords: ['pharmacy', 'pharmacies', 'medicine'], category: 'pharmacy' },
+    { keywords: ['hotel', 'hotels'], category: 'hotel' },
+    { keywords: ['school', 'college'], category: 'schoolCollege' },
+    { keywords: ['university', 'universities'], category: 'university' },
+    { keywords: ['atm', 'cash'], category: 'atm' },
+    { keywords: ['supermarket', 'supermarkets', 'grocery'], category: 'supermarket' }
+];
+
+export function getCategoryFromSearchTerm(searchTerm) {
+    const normalizedTerm = searchTerm.trim().toLowerCase();
+    const match = searchKeywordMap.find(({ keywords }) => (
+        keywords.some((keyword) => normalizedTerm.includes(keyword))
+    ));
+
+    return match?.category || null;
+}
+
 export async function fetchNearbyPlaces(category, location, radiusKm) {
     const geoapifyCategory = categoryMap[category];
     if (!geoapifyCategory) {

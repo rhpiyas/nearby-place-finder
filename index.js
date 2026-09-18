@@ -1,13 +1,36 @@
 import { getCurrentLocation, setupLocation } from './location.js';
-import { fetchNearbyPlaces as requestNearbyPlaces } from './place.js';
+import {
+    fetchNearbyPlaces as requestNearbyPlaces,
+    getCategoryFromSearchTerm
+} from './place.js';
 
 const statusMessage = document.querySelector('#status-message');
 const placesList = document.querySelector('#places-list');
+const searchForm = document.querySelector('#place-search-form');
+const searchInput = document.querySelector('#place-search');
 const categoryButtons = document.querySelectorAll('[data-category]');
 const radiusButtons = document.querySelectorAll('[data-radius]');
 
 let selectedRadiusKm = 3;
 let selectedCategory = null;
+
+function selectCategory(category) {
+    selectedCategory = category;
+    categoryButtons.forEach((categoryButton) => {
+        categoryButton.setAttribute(
+            'aria-pressed',
+            String(categoryButton.dataset.category === category)
+        );
+    });
+}
+
+function clearSearchResults() {
+    selectedCategory = null;
+    placesList.replaceChildren();
+    categoryButtons.forEach((categoryButton) => {
+        categoryButton.setAttribute('aria-pressed', 'false');
+    });
+}
 
 function getPlaceCoordinates(place) {
     const properties = place.properties || {};
@@ -151,13 +174,24 @@ radiusButtons.forEach((button) => {
 
 categoryButtons.forEach((button) => {
     button.addEventListener('click', () => {
-        selectedCategory = button.dataset.category;
-        categoryButtons.forEach((categoryButton) => {
-            categoryButton.setAttribute(
-                'aria-pressed',
-                String(categoryButton === button)
-            );
-        });
+        selectCategory(button.dataset.category);
         fetchNearbyPlaces(selectedCategory);
     });
+});
+
+searchForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const category = getCategoryFromSearchTerm(searchInput.value);
+    if (!category) {
+        clearSearchResults();
+        const searchTerm = searchInput.value.trim();
+        statusMessage.textContent = searchTerm
+            ? `No category found for "${searchTerm}". Try pizza, coffee, pharmacy, or supermarket.`
+            : 'Please enter a place or category to search.';
+        return;
+    }
+
+    selectCategory(category);
+    fetchNearbyPlaces(selectedCategory);
 });
