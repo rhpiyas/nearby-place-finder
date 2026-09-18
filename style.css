@@ -31,7 +31,7 @@ body::before {
 }
 
 header, main, footer {
-    width: min(1120px, calc(100% - 48px));
+    width: min(1180px, calc(100% - 28px));
     margin: 0 auto;
 }
 

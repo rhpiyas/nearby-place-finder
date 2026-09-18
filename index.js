@@ -10,6 +10,11 @@ import {
     showPlaces,
     showUserLocation
 } from './map.js';
+import {
+    getFavorites,
+    isFavorite,
+    toggleFavorite
+} from './favorites.js';
 
 const statusMessage = document.querySelector('#status-message');
 const placesList = document.querySelector('#places-list');
@@ -18,6 +23,9 @@ const searchInput = document.querySelector('#place-search');
 const categoryButtons = document.querySelectorAll('[data-category]');
 const radiusButtons = document.querySelectorAll('[data-radius]');
 const filterButtons = document.querySelectorAll('[data-filter]');
+const favoritesButton = document.querySelector('#favorites-button');
+const favoritesIcon = document.querySelector('.favorite-icon');
+const favoritesCount = document.querySelector('#favorites-count');
 const showMapButton = document.querySelector('#show-map-button');
 const hideMapButton = document.querySelector('#hide-map-button');
 const mapElement = document.querySelector('#map');
@@ -25,6 +33,9 @@ const mapElement = document.querySelector('#map');
 let selectedRadiusKm = 3;
 let selectedCategory = null;
 let selectedFilter = 'distance';
+let currentPlaces = [];
+let currentPlacesCategory = null;
+let showingFavorites = false;
 
 function selectCategory(category) {
     selectedCategory = category;
@@ -42,6 +53,12 @@ function clearSearchResults() {
     categoryButtons.forEach((categoryButton) => {
         categoryButton.setAttribute('aria-pressed', 'false');
     });
+}
+
+function updateFavoritesButton() {
+    favoritesCount.textContent = String(getFavorites().length);
+    favoritesIcon.textContent = showingFavorites ? '★' : '☆';
+    favoritesButton.setAttribute('aria-pressed', String(showingFavorites));
 }
 
 function getPlaceCoordinates(place) {
@@ -177,6 +194,33 @@ function createPlaceCard(place, category, userLocation) {
     card.className = 'place-card';
     card.addEventListener('click', () => focusPlace(place));
 
+    const favoriteButton = document.createElement('button');
+    favoriteButton.type = 'button';
+    favoriteButton.className = 'favorite-button';
+    favoriteButton.textContent = isFavorite(place) ? 'Remove favorite' : 'Save favorite';
+    favoriteButton.setAttribute('aria-pressed', String(isFavorite(place)));
+    favoriteButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const saved = toggleFavorite(place, category);
+        favoriteButton.textContent = saved ? 'Remove favorite' : 'Save favorite';
+        favoriteButton.setAttribute('aria-pressed', String(saved));
+        updateFavoritesButton();
+
+        if (showingFavorites && !saved) {
+            const currentLocation = getCurrentLocation();
+            const favorites = getFavorites();
+            renderPlaceCards(
+                favorites.map(({ place: favoritePlace }) => favoritePlace),
+                'Favorites',
+                currentLocation
+            );
+            statusMessage.textContent = favorites.length
+                ? `Showing ${favorites.length} favorite places.`
+                : 'No favorite places saved yet.';
+        }
+    });
+    card.append(favoriteButton);
+
     const name = document.createElement('h3');
     name.className = 'place-name';
     name.textContent = properties.name || 'Unnamed place';
@@ -273,6 +317,18 @@ function renderPlaceCards(places, category, userLocation) {
     placesList.append(fragment);
     showPlaces(places, userLocation, getPlaceCoordinates);
     requestAnimationFrame(syncCardRowHeights);
+    updateFavoritesButton();
+}
+
+function renderFavoritePlaces() {
+    const currentLocation = getCurrentLocation();
+    const favorites = getFavorites();
+    const favoritePlaces = favorites.map(({ place }) => place);
+
+    renderPlaceCards(favoritePlaces, 'Favorites', currentLocation);
+    statusMessage.textContent = favoritePlaces.length
+        ? `Showing ${favoritePlaces.length} favorite places.`
+        : 'No favorite places saved yet.';
 }
 
 async function fetchNearbyPlaces(category) {
@@ -287,6 +343,9 @@ async function fetchNearbyPlaces(category) {
 
     try {
         const places = await requestNearbyPlaces(category, currentLocation, selectedRadiusKm);
+        currentPlaces = places;
+        currentPlacesCategory = category;
+        showingFavorites = false;
         const placeCount = places.length;
         statusMessage.textContent = placeCount
             ? `Found ${placeCount} nearby ${category} places within ${selectedRadiusKm} km.`
@@ -300,6 +359,23 @@ async function fetchNearbyPlaces(category) {
 
 setupMap();
 setupLocation(statusMessage, showUserLocation);
+updateFavoritesButton();
+
+favoritesButton.addEventListener('click', () => {
+    const currentLocation = getCurrentLocation();
+    if (!currentLocation) {
+        statusMessage.textContent = 'Allow location access before viewing favorites.';
+        return;
+    }
+
+    showingFavorites = !showingFavorites;
+    if (showingFavorites) {
+        renderFavoritePlaces();
+    } else if (currentPlacesCategory) {
+        renderPlaceCards(currentPlaces, currentPlacesCategory, currentLocation);
+        statusMessage.textContent = `Found ${currentPlaces.length} nearby ${currentPlacesCategory} places within ${selectedRadiusKm} km.`;
+    }
+});
 
 showMapButton.addEventListener('click', () => {
     mapElement.hidden = false;
@@ -330,7 +406,11 @@ radiusButtons.forEach((button) => {
             );
         });
 
-        if (selectedCategory) fetchNearbyPlaces(selectedCategory);
+        if (showingFavorites) {
+            renderFavoritePlaces();
+        } else if (selectedCategory) {
+            fetchNearbyPlaces(selectedCategory);
+        }
     });
 });
 
@@ -344,7 +424,11 @@ filterButtons.forEach((button) => {
             );
         });
 
-        if (selectedCategory) fetchNearbyPlaces(selectedCategory);
+        if (showingFavorites) {
+            renderFavoritePlaces();
+        } else if (selectedCategory) {
+            fetchNearbyPlaces(selectedCategory);
+        }
     });
 });
 
