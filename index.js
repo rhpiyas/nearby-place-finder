@@ -1,22 +1,9 @@
-const locationButton = document.querySelector('#use-location-button');
-const currentLocationElement = document.querySelector('#current-location');
+import { getCurrentLocation, setupLocation } from './location.js';
+import { fetchNearbyPlaces as requestNearbyPlaces } from './place.js';
+
 const statusMessage = document.querySelector('#status-message');
 const placesList = document.querySelector('#places-list');
 const categoryButtons = document.querySelectorAll('[data-category]');
-
-let currentLocation = null;
-const geoapifyApiKey = '86e57720c76d42ada8cd2d13b7a76006';
-
-const categoryMap = {
-    restaurant: 'catering.restaurant',
-    cafe: 'catering.cafe',
-    hospital: 'healthcare.hospital',
-    pharmacy: 'healthcare.pharmacy',
-    hotel: 'accommodation.hotel',
-    university: 'education.university',
-    atm: 'service.financial.atm',
-    supermarket: 'commercial.supermarket'
-};
 
 function getPlaceCoordinates(place) {
     const properties = place.properties || {};
@@ -73,36 +60,17 @@ function renderPlaceCards(places, category) {
 }
 
 async function fetchNearbyPlaces(category) {
+    const currentLocation = getCurrentLocation();
     if (!currentLocation) {
         statusMessage.textContent = 'Allow location access before choosing a category.';
         return;
     }
 
-    const geoapifyCategory = categoryMap[category];
-    if (!geoapifyCategory) return;
-
-    const { latitude, longitude } = currentLocation;
-    const params = new URLSearchParams({
-        categories: geoapifyCategory,
-        filter: `circle:${longitude},${latitude},3000`,
-        limit: '30',
-        apiKey: geoapifyApiKey
-    });
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-
     statusMessage.textContent = `Finding nearby ${category} places...`;
     placesList.textContent = '';
 
     try {
-        const response = await fetch(
-            `https://api.geoapify.com/v2/places?${params}`,
-            { signal: controller.signal }
-        );
-        if (!response.ok) throw new Error(`Geoapify returned ${response.status}`);
-
-        const data = await response.json();
-        const places = data.features || [];
+        const places = await requestNearbyPlaces(category, currentLocation);
         const placeCount = places.length;
         statusMessage.textContent = placeCount
             ? `Found ${placeCount} nearby ${category} places.`
@@ -111,81 +79,10 @@ async function fetchNearbyPlaces(category) {
     } catch (error) {
         placesList.textContent = '';
         statusMessage.textContent = 'Places could not be loaded. Please try again.';
-    } finally {
-        clearTimeout(timeoutId);
     }
 }
 
-async function findPlaceName(latitude, longitude) {
-    try {
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=10`,
-            { headers: { Accept: 'application/json' } }
-        );
-
-        if (!response.ok) throw new Error('Place lookup failed');
-
-        const data = await response.json();
-        const address = data.address || {};
-        return address.city
-            || address.town
-            || address.village
-            || address.municipality
-            || address.county
-            || address.state;
-    } catch (error) {
-        return null;
-    }
-}
-
-async function handleLocationSuccess(position) {
-    const { latitude, longitude, accuracy } = position.coords;
-
-    currentLocation = { latitude, longitude, accuracy };
-    locationButton.disabled = false;
-    locationButton.textContent = 'Location Ready';
-    currentLocationElement.textContent = 'Finding place name...';
-    statusMessage.textContent = 'Location access granted. Looking up your area...';
-
-    const placeName = await findPlaceName(latitude, longitude);
-    currentLocationElement.textContent = placeName
-        ? `Current location: ${placeName}`
-        : `Current location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-    statusMessage.textContent = 'Location ready. Choose a category to find nearby places.';
-}
-
-function handleLocationError(error) {
-    const messages = {
-        1: 'Location permission was denied. Allow access to discover nearby places.',
-        2: 'Your location is currently unavailable. Please try again.',
-        3: 'Location request timed out. Please try again.'
-    };
-
-    locationButton.disabled = false;
-    locationButton.textContent = 'Use My Location';
-    currentLocationElement.textContent = 'Location not selected';
-    statusMessage.textContent = messages[error.code] || 'Unable to access your location.';
-}
-
-function requestLocation() {
-    if (!navigator.geolocation) {
-        statusMessage.textContent = 'Geolocation is not supported by this browser.';
-        return;
-    }
-
-    locationButton.disabled = true;
-    locationButton.textContent = 'Finding location...';
-    currentLocationElement.textContent = 'Reading your coordinates...';
-    statusMessage.textContent = 'Finding your location...';
-
-    navigator.geolocation.getCurrentPosition(
-        handleLocationSuccess,
-        handleLocationError,
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
-    );
-}
-
-locationButton.addEventListener('click', requestLocation);
+setupLocation(statusMessage);
 
 categoryButtons.forEach((button) => {
     button.addEventListener('click', () => fetchNearbyPlaces(button.dataset.category));
