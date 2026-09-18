@@ -4,44 +4,42 @@ const statusMessage = document.querySelector('#status-message');
 const placesList = document.querySelector('#places-list');
 const categoryButtons = document.querySelectorAll('[data-category]');
 
-// This value will be used later when we request nearby places.
 let currentLocation = null;
+const geoapifyApiKey = '86e57720c76d42ada8cd2d13b7a76006';
 
-const categoryTags = {
-    restaurant: ['amenity', 'restaurant'],
-    cafe: ['amenity', 'cafe'],
-    hospital: ['amenity', 'hospital'],
-    pharmacy: ['amenity', 'pharmacy'],
-    hotel: ['tourism', 'hotel'],
-    university: ['amenity', 'university'],
-    atm: ['amenity', 'atm'],
-    supermarket: ['shop', 'supermarket']
+const categoryMap = {
+    restaurant: 'catering.restaurant',
+    cafe: 'catering.cafe',
+    hospital: 'healthcare.hospital',
+    pharmacy: 'healthcare.pharmacy',
+    hotel: 'accommodation.hotel',
+    university: 'education.university',
+    atm: 'service.financial.atm',
+    supermarket: 'commercial.supermarket'
 };
 
-const overpassEndpoints = [
-    'https://overpass-api.de/api/interpreter',
-    'https://overpass.kumi.systems/api/interpreter'
-];
-
 function getPlaceCoordinates(place) {
+    const properties = place.properties || {};
+
     return {
-        latitude: place.lat ?? place.center?.lat,
-        longitude: place.lon ?? place.center?.lon
+        latitude: properties.lat ?? place.lat ?? place.center?.lat,
+        longitude: properties.lon ?? place.lon ?? place.center?.lon
     };
 }
 
 function createPlaceCard(place, category) {
     const card = document.createElement('article');
-    const tags = place.tags || {};
+    const properties = place.properties || {};
     const { latitude, longitude } = getPlaceCoordinates(place);
-    const address = [tags['addr:housenumber'], tags['addr:street'], tags['addr:city']]
-        .filter(Boolean)
-        .join(', ');
+    const address = properties.formatted
+        || [properties.housenumber, properties.street, properties.city]
+            .filter(Boolean)
+            .join(', ');
 
     card.className = 'place-card';
 
     const name = document.createElement('h3');
-    name.textContent = tags.name || 'Unnamed place';
+    name.textContent = properties.name || 'Unnamed place';
 
     const type = document.createElement('span');
     type.className = 'place-category';
@@ -74,60 +72,47 @@ function renderPlaceCards(places, category) {
     placesList.append(fragment);
 }
 
-async function fetchOverpassData(query) {
-    let lastError;
-
-    for (const endpoint of overpassEndpoints) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-        try {
-            const response = await fetch(
-                `${endpoint}?data=${encodeURIComponent(query)}`,
-                { signal: controller.signal }
-            );
-            if (!response.ok) throw new Error(`Overpass returned ${response.status}`);
-            return await response.json();
-        } catch (error) {
-            lastError = error;
-        } finally {
-            clearTimeout(timeoutId);
-        }
-    }
-
-    throw lastError || new Error('All Overpass endpoints failed');
-}
-
 async function fetchNearbyPlaces(category) {
     if (!currentLocation) {
         statusMessage.textContent = 'Allow location access before choosing a category.';
         return;
     }
 
-    const categoryTag = categoryTags[category];
-    if (!categoryTag) return;
+    const geoapifyCategory = categoryMap[category];
+    if (!geoapifyCategory) return;
 
-    const [tagKey, tagValue] = categoryTag;
     const { latitude, longitude } = currentLocation;
-    const query = `
-        [out:json][timeout:25];
-        nwr["${tagKey}"="${tagValue}"](around:3000,${latitude},${longitude});
-        out center tags;
-    `;
+    const params = new URLSearchParams({
+        categories: geoapifyCategory,
+        filter: `circle:${longitude},${latitude},3000`,
+        limit: '30',
+        apiKey: geoapifyApiKey
+    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     statusMessage.textContent = `Finding nearby ${category} places...`;
     placesList.textContent = '';
 
     try {
-        const data = await fetchOverpassData(query);
-        const placeCount = data.elements.length;
+        const response = await fetch(
+            `https://api.geoapify.com/v2/places?${params}`,
+            { signal: controller.signal }
+        );
+        if (!response.ok) throw new Error(`Geoapify returned ${response.status}`);
+
+        const data = await response.json();
+        const places = data.features || [];
+        const placeCount = places.length;
         statusMessage.textContent = placeCount
             ? `Found ${placeCount} nearby ${category} places.`
             : `No nearby ${category} places found.`;
-        renderPlaceCards(data.elements, category);
+        renderPlaceCards(places, category);
     } catch (error) {
         placesList.textContent = '';
         statusMessage.textContent = 'Places could not be loaded. Please try again.';
+    } finally {
+        clearTimeout(timeoutId);
     }
 }
 
