@@ -1,3 +1,5 @@
+import { searchKeywordMap } from './searchKeywords.js';
+
 const geoapifyApiKey = '86e57720c76d42ada8cd2d13b7a76006';
 
 const categoryMap = {
@@ -11,18 +13,6 @@ const categoryMap = {
     atm: 'service.financial.atm',
     supermarket: 'commercial.supermarket'
 };
-
-const searchKeywordMap = [
-    { keywords: ['restaurant', 'restaurants', 'food', 'pizza'], category: 'restaurant' },
-    { keywords: ['cafe', 'cafes', 'coffee'], category: 'cafe' },
-    { keywords: ['hospital', 'hospitals'], category: 'hospital' },
-    { keywords: ['pharmacy', 'pharmacies', 'medicine'], category: 'pharmacy' },
-    { keywords: ['hotel', 'hotels'], category: 'hotel' },
-    { keywords: ['school', 'college'], category: 'schoolCollege' },
-    { keywords: ['university', 'universities'], category: 'university' },
-    { keywords: ['atm', 'cash'], category: 'atm' },
-    { keywords: ['supermarket', 'supermarkets', 'grocery'], category: 'supermarket' }
-];
 
 export function getCategoryFromSearchTerm(searchTerm) {
     const normalizedTerm = searchTerm.trim().toLowerCase();
