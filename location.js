@@ -3,6 +3,7 @@ const currentLocationElement = document.querySelector('#current-location');
 
 let currentLocation = null;
 let statusMessage = null;
+let onLocationReady = null;
 
 export function getCurrentLocation() {
     return currentLocation;
@@ -34,6 +35,7 @@ async function handleLocationSuccess(position) {
     const { latitude, longitude, accuracy } = position.coords;
 
     currentLocation = { latitude, longitude, accuracy };
+    onLocationReady?.(currentLocation);
     locationButton.disabled = false;
     locationButton.classList.add('location-ready');
     locationButton.textContent = 'Location Ready';
@@ -80,7 +82,8 @@ function requestLocation() {
     );
 }
 
-export function setupLocation(statusElement) {
+export function setupLocation(statusElement, locationReadyCallback) {
     statusMessage = statusElement;
+    onLocationReady = locationReadyCallback;
     locationButton.addEventListener('click', requestLocation);
 }

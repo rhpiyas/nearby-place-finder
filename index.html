@@ -6,6 +6,10 @@
     <meta name="description" content="Discover useful places around you with Ashepashe.">
     <title>Ashe Pashe</title>
     <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
 </head>
 <body>
     <header>
@@ -64,6 +68,17 @@
             </div>
         </section>
 
+        <section class="map-section" aria-labelledby="map-heading">
+            <div class="map-heading-row">
+                <h2 id="map-heading">Nearby map</h2>
+                <div class="map-visibility-controls" role="group" aria-label="Map visibility">
+                    <button type="button" id="show-map-button" aria-pressed="false">Show</button>
+                    <button type="button" id="hide-map-button" aria-pressed="true">Hide</button>
+                </div>
+            </div>
+            <div id="map" hidden aria-label="Map showing your location and nearby places"></div>
+        </section>
+
         <section aria-labelledby="results-heading">
             <h2 id="results-heading">Nearby places</h2>
             <p id="status-message">Allow location access to discover nearby places.</p>
@@ -75,6 +90,9 @@
         <p>&copy; 2026 Ashepashe</p>
         <p>Place names powered by <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>.</p>
     </footer>
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
     <script type="module" src="index.js"></script>
 </body>
 </html>

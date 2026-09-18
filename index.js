@@ -3,6 +3,13 @@ import {
     fetchNearbyPlaces as requestNearbyPlaces,
     getCategoryFromSearchTerm
 } from './place.js';
+import {
+    focusPlace,
+    refreshMapSize,
+    setupMap,
+    showPlaces,
+    showUserLocation
+} from './map.js';
 
 const statusMessage = document.querySelector('#status-message');
 const placesList = document.querySelector('#places-list');
@@ -11,6 +18,9 @@ const searchInput = document.querySelector('#place-search');
 const categoryButtons = document.querySelectorAll('[data-category]');
 const radiusButtons = document.querySelectorAll('[data-radius]');
 const filterButtons = document.querySelectorAll('[data-filter]');
+const showMapButton = document.querySelector('#show-map-button');
+const hideMapButton = document.querySelector('#hide-map-button');
+const mapElement = document.querySelector('#map');
 
 let selectedRadiusKm = 3;
 let selectedCategory = null;
@@ -165,6 +175,7 @@ function createPlaceCard(place, category, userLocation) {
             .join(', ');
 
     card.className = 'place-card';
+    card.addEventListener('click', () => focusPlace(place));
 
     const name = document.createElement('h3');
     name.className = 'place-name';
@@ -260,6 +271,7 @@ function renderPlaceCards(places, category, userLocation) {
         fragment.append(createPlaceCard(place, category, userLocation));
     });
     placesList.append(fragment);
+    showPlaces(places, userLocation, getPlaceCoordinates);
     requestAnimationFrame(syncCardRowHeights);
 }
 
@@ -286,7 +298,21 @@ async function fetchNearbyPlaces(category) {
     }
 }
 
-setupLocation(statusMessage);
+setupMap();
+setupLocation(statusMessage, showUserLocation);
+
+showMapButton.addEventListener('click', () => {
+    mapElement.hidden = false;
+    showMapButton.setAttribute('aria-pressed', 'true');
+    hideMapButton.setAttribute('aria-pressed', 'false');
+    requestAnimationFrame(refreshMapSize);
+});
+
+hideMapButton.addEventListener('click', () => {
+    mapElement.hidden = true;
+    showMapButton.setAttribute('aria-pressed', 'false');
+    hideMapButton.setAttribute('aria-pressed', 'true');
+});
 
 let resizeFrameId;
 window.addEventListener('resize', () => {

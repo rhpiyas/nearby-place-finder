@@ -257,6 +257,54 @@ main > .result-filters {
     backdrop-filter: blur(18px) saturate(1.1);
 }
 
+main > .map-section {
+    margin-top: 16px;
+    padding: 22px 24px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(10, 29, 24, .64);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px) saturate(1.1);
+}
+
+main > .map-section h2 { margin: 0; }
+
+.map-heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.map-visibility-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.map-visibility-controls button {
+    border-color: var(--border);
+    color: var(--ink);
+    background: var(--surface);
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+.map-visibility-controls button[aria-pressed="true"] {
+    border-color: var(--accent);
+    color: var(--surface);
+    background: var(--accent);
+}
+
+#map {
+    min-height: 420px;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.place-card { cursor: pointer; }
+
 main > .result-filters h2 { margin-bottom: 12px; }
 
 .filter-options {
