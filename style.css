@@ -204,10 +204,52 @@ nav button:hover {
 }
 
 #places-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
     min-height: 72px;
-    border: 1px dashed var(--border);
     border-radius: 12px;
-    background: rgba(7, 22, 18, .38);
+}
+
+.place-card {
+    display: flex;
+    min-height: 170px;
+    flex-direction: column;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(7, 22, 18, .52);
+    backdrop-filter: blur(12px);
+}
+
+.place-card h3 {
+    margin: 0 0 8px;
+    color: var(--ink);
+    font-size: 1rem;
+}
+
+.place-category {
+    width: fit-content;
+    margin-bottom: 12px;
+    color: var(--accent);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.place-card p {
+    margin-bottom: 16px;
+    color: var(--muted);
+    font-size: .82rem;
+    line-height: 1.45;
+}
+
+.place-card a {
+    margin-top: auto;
+    color: var(--ink);
+    font-size: .8rem;
+    font-weight: 700;
 }
 
 footer {

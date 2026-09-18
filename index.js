@@ -1,9 +1,135 @@
 const locationButton = document.querySelector('#use-location-button');
 const currentLocationElement = document.querySelector('#current-location');
 const statusMessage = document.querySelector('#status-message');
+const placesList = document.querySelector('#places-list');
+const categoryButtons = document.querySelectorAll('[data-category]');
 
 // This value will be used later when we request nearby places.
 let currentLocation = null;
+
+const categoryTags = {
+    restaurant: ['amenity', 'restaurant'],
+    cafe: ['amenity', 'cafe'],
+    hospital: ['amenity', 'hospital'],
+    pharmacy: ['amenity', 'pharmacy'],
+    hotel: ['tourism', 'hotel'],
+    university: ['amenity', 'university'],
+    atm: ['amenity', 'atm'],
+    supermarket: ['shop', 'supermarket']
+};
+
+const overpassEndpoints = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter'
+];
+
+function getPlaceCoordinates(place) {
+    return {
+        latitude: place.lat ?? place.center?.lat,
+        longitude: place.lon ?? place.center?.lon
+    };
+}
+
+function createPlaceCard(place, category) {
+    const card = document.createElement('article');
+    const tags = place.tags || {};
+    const { latitude, longitude } = getPlaceCoordinates(place);
+    const address = [tags['addr:housenumber'], tags['addr:street'], tags['addr:city']]
+        .filter(Boolean)
+        .join(', ');
+
+    card.className = 'place-card';
+
+    const name = document.createElement('h3');
+    name.textContent = tags.name || 'Unnamed place';
+
+    const type = document.createElement('span');
+    type.className = 'place-category';
+    type.textContent = category;
+
+    const addressText = document.createElement('p');
+    addressText.textContent = address || 'Address not available';
+
+    card.append(name, type, addressText);
+
+    if (latitude !== undefined && longitude !== undefined) {
+        const mapLink = document.createElement('a');
+        mapLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=18/${latitude}/${longitude}`;
+        mapLink.target = '_blank';
+        mapLink.rel = 'noreferrer';
+        mapLink.textContent = 'View on map';
+        card.append(mapLink);
+    }
+
+    return card;
+}
+
+function renderPlaceCards(places, category) {
+    placesList.replaceChildren();
+
+    const fragment = document.createDocumentFragment();
+    places.slice(0, 30).forEach((place) => {
+        fragment.append(createPlaceCard(place, category));
+    });
+    placesList.append(fragment);
+}
+
+async function fetchOverpassData(query) {
+    let lastError;
+
+    for (const endpoint of overpassEndpoints) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        try {
+            const response = await fetch(
+                `${endpoint}?data=${encodeURIComponent(query)}`,
+                { signal: controller.signal }
+            );
+            if (!response.ok) throw new Error(`Overpass returned ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            lastError = error;
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
+    throw lastError || new Error('All Overpass endpoints failed');
+}
+
+async function fetchNearbyPlaces(category) {
+    if (!currentLocation) {
+        statusMessage.textContent = 'Allow location access before choosing a category.';
+        return;
+    }
+
+    const categoryTag = categoryTags[category];
+    if (!categoryTag) return;
+
+    const [tagKey, tagValue] = categoryTag;
+    const { latitude, longitude } = currentLocation;
+    const query = `
+        [out:json][timeout:25];
+        nwr["${tagKey}"="${tagValue}"](around:3000,${latitude},${longitude});
+        out center tags;
+    `;
+
+    statusMessage.textContent = `Finding nearby ${category} places...`;
+    placesList.textContent = '';
+
+    try {
+        const data = await fetchOverpassData(query);
+        const placeCount = data.elements.length;
+        statusMessage.textContent = placeCount
+            ? `Found ${placeCount} nearby ${category} places.`
+            : `No nearby ${category} places found.`;
+        renderPlaceCards(data.elements, category);
+    } catch (error) {
+        placesList.textContent = '';
+        statusMessage.textContent = 'Places could not be loaded. Please try again.';
+    }
+}
 
 async function findPlaceName(latitude, longitude) {
     try {
@@ -75,3 +201,7 @@ function requestLocation() {
 }
 
 locationButton.addEventListener('click', requestLocation);
+
+categoryButtons.forEach((button) => {
+    button.addEventListener('click', () => fetchNearbyPlaces(button.dataset.category));
+});
