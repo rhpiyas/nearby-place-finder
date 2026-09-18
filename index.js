@@ -315,6 +315,7 @@ function syncCardRowHeights() {
 function renderPlaceCards(places, category, userLocation) {
     placesList.replaceChildren();
     placesList.dataset.state = places.length ? 'results' : 'empty';
+    placesList.setAttribute('aria-busy', 'false');
 
     const fragment = document.createDocumentFragment();
     sortPlaces(places, userLocation, selectedFilter).slice(0, 30).forEach((place) => {
@@ -350,6 +351,7 @@ async function fetchNearbyPlaces(category) {
     );
     placesList.textContent = '';
     placesList.dataset.state = 'loading';
+    placesList.setAttribute('aria-busy', 'true');
 
     try {
         const places = await requestNearbyPlaces(category, currentLocation, selectedRadiusKm);
@@ -365,6 +367,7 @@ async function fetchNearbyPlaces(category) {
     } catch (error) {
         placesList.textContent = '';
         placesList.dataset.state = 'error';
+        placesList.setAttribute('aria-busy', 'false');
         setStatus('Places could not be loaded. Please try again.', 'error');
     }
 }

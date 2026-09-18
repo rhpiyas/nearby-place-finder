@@ -124,6 +124,11 @@ button:focus-visible, input:focus-visible {
     outline-offset: 3px;
 }
 
+a:focus-visible {
+    outline: 3px solid rgba(232, 111, 80, .35);
+    outline-offset: 3px;
+}
+
 #use-location-button.location-ready {
     border-color: #68d391;
     color: #082015;
@@ -499,6 +504,17 @@ main > .result-filters h2 { margin-bottom: 12px; }
 
 .place-card a:hover {
     color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+
+    button:hover { transform: none; }
 }
 
 .place-card h3,
