@@ -6,12 +6,13 @@ const categoryMap = {
     hospital: 'healthcare.hospital',
     pharmacy: 'healthcare.pharmacy',
     hotel: 'accommodation.hotel',
+    schoolCollege: 'education.school,education.college',
     university: 'education.university',
     atm: 'service.financial.atm',
     supermarket: 'commercial.supermarket'
 };
 
-export async function fetchNearbyPlaces(category, location) {
+export async function fetchNearbyPlaces(category, location, radiusKm) {
     const geoapifyCategory = categoryMap[category];
     if (!geoapifyCategory) {
         throw new Error(`Unsupported category: ${category}`);
@@ -20,7 +21,7 @@ export async function fetchNearbyPlaces(category, location) {
     const { latitude, longitude } = location;
     const params = new URLSearchParams({
         categories: geoapifyCategory,
-        filter: `circle:${longitude},${latitude},3000`,
+        filter: `circle:${longitude},${latitude},${radiusKm * 1000}`,
         limit: '30',
         apiKey: geoapifyApiKey
     });

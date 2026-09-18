@@ -4,6 +4,10 @@ import { fetchNearbyPlaces as requestNearbyPlaces } from './place.js';
 const statusMessage = document.querySelector('#status-message');
 const placesList = document.querySelector('#places-list');
 const categoryButtons = document.querySelectorAll('[data-category]');
+const radiusButtons = document.querySelectorAll('[data-radius]');
+
+let selectedRadiusKm = 3;
+let selectedCategory = null;
 
 function getPlaceCoordinates(place) {
     const properties = place.properties || {};
@@ -66,15 +70,15 @@ async function fetchNearbyPlaces(category) {
         return;
     }
 
-    statusMessage.textContent = `Finding nearby ${category} places...`;
+    statusMessage.textContent = `Finding nearby ${category} places within ${selectedRadiusKm} km...`;
     placesList.textContent = '';
 
     try {
-        const places = await requestNearbyPlaces(category, currentLocation);
+        const places = await requestNearbyPlaces(category, currentLocation, selectedRadiusKm);
         const placeCount = places.length;
         statusMessage.textContent = placeCount
-            ? `Found ${placeCount} nearby ${category} places.`
-            : `No nearby ${category} places found.`;
+            ? `Found ${placeCount} nearby ${category} places within ${selectedRadiusKm} km.`
+            : `No nearby ${category} places found within ${selectedRadiusKm} km.`;
         renderPlaceCards(places, category);
     } catch (error) {
         placesList.textContent = '';
@@ -84,6 +88,29 @@ async function fetchNearbyPlaces(category) {
 
 setupLocation(statusMessage);
 
+radiusButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        selectedRadiusKm = Number(button.dataset.radius);
+        radiusButtons.forEach((radiusButton) => {
+            radiusButton.setAttribute(
+                'aria-pressed',
+                String(radiusButton === button)
+            );
+        });
+
+        if (selectedCategory) fetchNearbyPlaces(selectedCategory);
+    });
+});
+
 categoryButtons.forEach((button) => {
-    button.addEventListener('click', () => fetchNearbyPlaces(button.dataset.category));
+    button.addEventListener('click', () => {
+        selectedCategory = button.dataset.category;
+        categoryButtons.forEach((categoryButton) => {
+            categoryButton.setAttribute(
+                'aria-pressed',
+                String(categoryButton === button)
+            );
+        });
+        fetchNearbyPlaces(selectedCategory);
+    });
 });

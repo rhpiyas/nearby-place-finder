@@ -30,17 +30,28 @@
             </form>
         </section>
 
+        <section class="search-radius" aria-labelledby="radius-heading">
+            <h2 id="radius-heading">Search distance</h2>
+            <div class="radius-options" role="group" aria-label="Search distance">
+                <button type="button" data-radius="1" aria-pressed="false">1 km</button>
+                <button type="button" data-radius="3" aria-pressed="true">3 km</button>
+                <button type="button" data-radius="5" aria-pressed="false">5 km</button>
+                <button type="button" data-radius="10" aria-pressed="false">10 km</button>
+            </div>
+        </section>
+
         <nav aria-label="Place categories">
             <h2>Categories</h2>
             <ul>
-                <li><button type="button" data-category="restaurant">Restaurants</button></li>
-                <li><button type="button" data-category="cafe">Cafes</button></li>
-                <li><button type="button" data-category="hospital">Hospitals</button></li>
-                <li><button type="button" data-category="pharmacy">Pharmacies</button></li>
-                <li><button type="button" data-category="hotel">Hotels</button></li>
-                <li><button type="button" data-category="university">Universities</button></li>
-                <li><button type="button" data-category="atm">ATMs</button></li>
-                <li><button type="button" data-category="supermarket">Supermarkets</button></li>
+                <li><button type="button" data-category="restaurant" aria-pressed="false">Restaurants</button></li>
+                <li><button type="button" data-category="cafe" aria-pressed="false">Cafes</button></li>
+                <li><button type="button" data-category="hospital" aria-pressed="false">Hospitals</button></li>
+                <li><button type="button" data-category="pharmacy" aria-pressed="false">Pharmacies</button></li>
+                <li><button type="button" data-category="hotel" aria-pressed="false">Hotels</button></li>
+                <li><button type="button" data-category="schoolCollege" aria-pressed="false">Schools &amp; Colleges</button></li>
+                <li><button type="button" data-category="university" aria-pressed="false">Universities</button></li>
+                <li><button type="button" data-category="atm" aria-pressed="false">ATMs</button></li>
+                <li><button type="button" data-category="supermarket" aria-pressed="false">Supermarkets</button></li>
             </ul>
         </nav>
 

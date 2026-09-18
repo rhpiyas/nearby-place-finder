@@ -185,6 +185,38 @@ nav ul {
     list-style: none;
 }
 
+main > .search-radius {
+    margin-bottom: 16px;
+    padding: 18px 24px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(10, 29, 24, .64);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px) saturate(1.1);
+}
+
+main > .search-radius h2 { margin-bottom: 12px; }
+
+.radius-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.radius-options button {
+    border-color: var(--border);
+    color: var(--ink);
+    background: var(--surface);
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.radius-options button[aria-pressed="true"] {
+    border-color: var(--accent);
+    color: var(--surface);
+    background: var(--accent);
+}
+
 nav button {
     border-color: var(--border);
     color: var(--ink);
@@ -196,6 +228,12 @@ nav button {
 nav button:hover {
     color: var(--surface);
     border-color: var(--accent);
+}
+
+nav button[aria-pressed="true"] {
+    border-color: var(--accent);
+    color: var(--surface);
+    background: var(--accent);
 }
 
 #status-message {
