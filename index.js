@@ -10,9 +10,11 @@ const searchForm = document.querySelector('#place-search-form');
 const searchInput = document.querySelector('#place-search');
 const categoryButtons = document.querySelectorAll('[data-category]');
 const radiusButtons = document.querySelectorAll('[data-radius]');
+const filterButtons = document.querySelectorAll('[data-filter]');
 
 let selectedRadiusKm = 3;
 let selectedCategory = null;
+let selectedFilter = 'distance';
 
 function selectCategory(category) {
     selectedCategory = category;
@@ -109,20 +111,47 @@ function getOpeningStatus(openingHours) {
     return isOpen ? 'Open now' : 'Closed now';
 }
 
-function sortPlacesByDistance(places, userLocation) {
+function getPlaceDistance(place, userLocation) {
+    const coordinates = getPlaceCoordinates(place);
+    if (!Number.isFinite(coordinates.latitude) || !Number.isFinite(coordinates.longitude)) {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    return calculateDistanceKm(userLocation, coordinates);
+}
+
+function getPlaceRating(place) {
+    const rating = Number(place.properties?.rating);
+    return Number.isFinite(rating) ? rating : null;
+}
+
+function sortPlaces(places, userLocation, filter) {
     return places.slice().sort((firstPlace, secondPlace) => {
-        const firstCoordinates = getPlaceCoordinates(firstPlace);
-        const secondCoordinates = getPlaceCoordinates(secondPlace);
-        const firstHasCoordinates = Number.isFinite(firstCoordinates.latitude)
-            && Number.isFinite(firstCoordinates.longitude);
-        const secondHasCoordinates = Number.isFinite(secondCoordinates.latitude)
-            && Number.isFinite(secondCoordinates.longitude);
+        const firstDistance = getPlaceDistance(firstPlace, userLocation);
+        const secondDistance = getPlaceDistance(secondPlace, userLocation);
 
-        if (!firstHasCoordinates) return 1;
-        if (!secondHasCoordinates) return -1;
+        if (filter === 'rating') {
+            const firstRating = getPlaceRating(firstPlace);
+            const secondRating = getPlaceRating(secondPlace);
 
-        return calculateDistanceKm(userLocation, firstCoordinates)
-            - calculateDistanceKm(userLocation, secondCoordinates);
+            if (firstRating === null && secondRating !== null) return 1;
+            if (firstRating !== null && secondRating === null) return -1;
+            if (firstRating !== null && secondRating !== null && firstRating !== secondRating) {
+                return secondRating - firstRating;
+            }
+        }
+
+        if (filter === 'status') {
+            const firstStatus = getOpeningStatus(firstPlace.properties?.opening_hours);
+            const secondStatus = getOpeningStatus(secondPlace.properties?.opening_hours);
+            const statusOrder = { 'Open now': 0, 'Closed now': 1 };
+            const firstOrder = statusOrder[firstStatus] ?? 2;
+            const secondOrder = statusOrder[secondStatus] ?? 2;
+
+            if (firstOrder !== secondOrder) return firstOrder - secondOrder;
+        }
+
+        return firstDistance - secondDistance;
     });
 }
 
@@ -227,7 +256,7 @@ function renderPlaceCards(places, category, userLocation) {
     placesList.replaceChildren();
 
     const fragment = document.createDocumentFragment();
-    sortPlacesByDistance(places, userLocation).slice(0, 30).forEach((place) => {
+    sortPlaces(places, userLocation, selectedFilter).slice(0, 30).forEach((place) => {
         fragment.append(createPlaceCard(place, category, userLocation));
     });
     placesList.append(fragment);
@@ -272,6 +301,20 @@ radiusButtons.forEach((button) => {
             radiusButton.setAttribute(
                 'aria-pressed',
                 String(radiusButton === button)
+            );
+        });
+
+        if (selectedCategory) fetchNearbyPlaces(selectedCategory);
+    });
+});
+
+filterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        selectedFilter = button.dataset.filter;
+        filterButtons.forEach((filterButton) => {
+            filterButton.setAttribute(
+                'aria-pressed',
+                String(filterButton === button)
             );
         });
 

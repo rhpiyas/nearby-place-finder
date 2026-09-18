@@ -247,6 +247,38 @@ nav button[aria-pressed="true"] {
     background: var(--accent);
 }
 
+main > .result-filters {
+    margin-top: 16px;
+    padding: 18px 24px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(10, 29, 24, .64);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px) saturate(1.1);
+}
+
+main > .result-filters h2 { margin-bottom: 12px; }
+
+.filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filter-options button {
+    border-color: var(--border);
+    color: var(--ink);
+    background: var(--surface);
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.filter-options button[aria-pressed="true"] {
+    border-color: var(--accent);
+    color: var(--surface);
+    background: var(--accent);
+}
+
 #status-message {
     color: var(--muted);
     font-size: .9rem;
