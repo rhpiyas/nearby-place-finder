@@ -54,7 +54,7 @@ header a {
 
 header p {
     margin: 0;
-    color: var(--muted);
+    color: #fff;
     font-size: .86rem;
 }
 
@@ -76,7 +76,7 @@ h1, h2, p { margin-top: 0; }
 h1 {
     max-width: none;
     margin-bottom: 12px;
-    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-size: clamp(2.1rem, 4.5vw, 3.4rem);
     font-weight: 750;
     letter-spacing: -.025em;
     line-height: 1.02;
