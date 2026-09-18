@@ -250,9 +250,19 @@ nav button[aria-pressed="true"] {
 }
 
 .place-card {
-    display: flex;
+    display: grid;
+    grid-template-rows:
+        var(--place-name-height, auto)
+        var(--place-category-height, auto)
+        var(--place-address-height, auto)
+        var(--place-distance-height, auto)
+        var(--place-rating-height, auto)
+        var(--place-status-height, auto)
+        var(--place-hours-height, auto)
+        var(--place-map-height, auto);
     min-height: 170px;
-    flex-direction: column;
+    align-items: start;
+    row-gap: 8px;
     padding: 18px;
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -261,14 +271,15 @@ nav button[aria-pressed="true"] {
 }
 
 .place-card h3 {
-    margin: 0 0 8px;
+    margin: 0;
     color: var(--ink);
     font-size: 1rem;
 }
 
 .place-category {
     width: fit-content;
-    margin-bottom: 12px;
+    max-width: 100%;
+    margin: 0;
     color: var(--accent);
     font-size: .7rem;
     font-weight: 700;
@@ -284,14 +295,14 @@ nav button[aria-pressed="true"] {
 }
 
 .place-card .place-distance {
-    margin-top: -8px;
+    margin: 0;
     color: var(--accent-soft);
     font-size: .76rem;
     font-weight: 700;
 }
 
 .place-card .place-detail {
-    margin-bottom: 8px;
+    margin: 0;
     font-size: .78rem;
 }
 
@@ -299,6 +310,8 @@ nav button[aria-pressed="true"] {
     color: var(--accent-soft);
     font-weight: 700;
 }
+
+.place-card p { margin: 0; }
 
 .opening-status-dot {
     display: inline-block;
@@ -314,10 +327,17 @@ nav button[aria-pressed="true"] {
 .opening-status-dot.is-closed { background: #f06b6b; }
 
 .place-card a {
-    margin-top: auto;
+    align-self: end;
     color: var(--ink);
     font-size: .8rem;
     font-weight: 700;
+}
+
+.place-card h3,
+.place-card p,
+.place-card span,
+.place-card a {
+    overflow-wrap: anywhere;
 }
 
 footer {

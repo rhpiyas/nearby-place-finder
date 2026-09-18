@@ -138,6 +138,7 @@ function createPlaceCard(place, category, userLocation) {
     card.className = 'place-card';
 
     const name = document.createElement('h3');
+    name.className = 'place-name';
     name.textContent = properties.name || 'Unnamed place';
 
     const type = document.createElement('span');
@@ -145,6 +146,7 @@ function createPlaceCard(place, category, userLocation) {
     type.textContent = category;
 
     const addressText = document.createElement('p');
+    addressText.className = 'place-detail place-address';
     addressText.textContent = address || 'Address not available';
 
     card.append(name, type, addressText);
@@ -160,7 +162,7 @@ function createPlaceCard(place, category, userLocation) {
     }
 
     const ratingText = document.createElement('p');
-    ratingText.className = 'place-detail';
+    ratingText.className = 'place-detail place-rating';
     ratingText.textContent = properties.rating !== undefined
         ? `Rating: ${properties.rating}`
         : 'Rating not found';
@@ -183,12 +185,13 @@ function createPlaceCard(place, category, userLocation) {
     card.append(openingStatusText);
 
     const openingHoursText = document.createElement('p');
-    openingHoursText.className = 'place-detail';
+    openingHoursText.className = 'place-detail place-hours';
     openingHoursText.textContent = `Hours: ${properties.opening_hours || 'Information not found'}`;
     card.append(openingHoursText);
 
     if (latitude !== undefined && longitude !== undefined) {
         const mapLink = document.createElement('a');
+        mapLink.className = 'place-map-link';
         mapLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=18/${latitude}/${longitude}`;
         mapLink.target = '_blank';
         mapLink.rel = 'noreferrer';
@@ -199,6 +202,27 @@ function createPlaceCard(place, category, userLocation) {
     return card;
 }
 
+function syncCardRowHeights() {
+    const rowSelectors = [
+        ['name', '.place-name'],
+        ['category', '.place-category'],
+        ['address', '.place-address'],
+        ['distance', '.place-distance'],
+        ['rating', '.place-rating'],
+        ['status', '.place-opening-status'],
+        ['hours', '.place-hours'],
+        ['map', '.place-map-link']
+    ];
+
+    rowSelectors.forEach(([rowName, selector]) => {
+        const rowHeight = [...placesList.querySelectorAll(selector)]
+            .reduce((maximumHeight, element) => (
+                Math.max(maximumHeight, element.scrollHeight)
+            ), 0);
+        placesList.style.setProperty(`--place-${rowName}-height`, `${rowHeight}px`);
+    });
+}
+
 function renderPlaceCards(places, category, userLocation) {
     placesList.replaceChildren();
 
@@ -207,6 +231,7 @@ function renderPlaceCards(places, category, userLocation) {
         fragment.append(createPlaceCard(place, category, userLocation));
     });
     placesList.append(fragment);
+    requestAnimationFrame(syncCardRowHeights);
 }
 
 async function fetchNearbyPlaces(category) {
@@ -233,6 +258,12 @@ async function fetchNearbyPlaces(category) {
 }
 
 setupLocation(statusMessage);
+
+let resizeFrameId;
+window.addEventListener('resize', () => {
+    cancelAnimationFrame(resizeFrameId);
+    resizeFrameId = requestAnimationFrame(syncCardRowHeights);
+});
 
 radiusButtons.forEach((button) => {
     button.addEventListener('click', () => {
