@@ -96,7 +96,7 @@ Open the project in VS Code and launch it with a local static server extension s
 This project uses the Geoapify Places API in `place.js`.
 
 ```js
-const geoapifyApiKey = '86e57720c76d42ada8cd2d13b7a76006';
+const geoapifyApiKey = 'hidden';
 ```
 
 If you want to use your own API key, replace the value in `place.js` with your personal key.

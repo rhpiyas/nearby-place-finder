@@ -36,6 +36,9 @@ let selectedFilter = 'distance';
 let currentPlaces = [];
 let currentPlacesCategory = null;
 let showingFavorites = false;
+let currentFavoritePlaces = [];
+let cardReorderFrameId;
+const placeCards = new WeakMap();
 
 function selectCategory(category) {
     selectedCategory = category;
@@ -49,6 +52,7 @@ function selectCategory(category) {
 
 function clearSearchResults() {
     selectedCategory = null;
+    cancelPendingCardReorder();
     placesList.replaceChildren();
     categoryButtons.forEach((categoryButton) => {
         categoryButton.setAttribute('aria-pressed', 'false');
@@ -212,16 +216,7 @@ function createPlaceCard(place, category, userLocation) {
         updateFavoritesButton();
 
         if (showingFavorites && !saved) {
-            const currentLocation = getCurrentLocation();
-            const favorites = getFavorites();
-            renderPlaceCards(
-                favorites.map(({ place: favoritePlace }) => favoritePlace),
-                'Favorites',
-                currentLocation
-            );
-            statusMessage.textContent = favorites.length
-                ? `Showing ${favorites.length} favorite places.`
-                : 'No favorite places saved yet.';
+            renderFavoritePlaces();
         }
     });
     card.append(favoriteButton);
@@ -292,6 +287,7 @@ function createPlaceCard(place, category, userLocation) {
     }
     card.append(mapLink);
 
+    placeCards.set(place, card);
     return card;
 }
 
@@ -317,29 +313,105 @@ function syncCardRowHeights() {
     });
 }
 
-function renderPlaceCards(places, category, userLocation) {
-    placesList.replaceChildren();
+function cancelPendingCardReorder() {
+    cancelAnimationFrame(cardReorderFrameId);
+    cardReorderFrameId = undefined;
+}
+
+function animateCardReorder(previousPositions, cards) {
+    cancelPendingCardReorder();
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+
+    cardReorderFrameId = requestAnimationFrame(() => {
+        cardReorderFrameId = undefined;
+        cards.forEach((card) => {
+            const previousPosition = previousPositions.get(card);
+            const currentPosition = card.getBoundingClientRect();
+
+            if (!previousPosition) {
+                card.animate?.([
+                    { opacity: 0, transform: 'scale(.98)' },
+                    { opacity: 1, transform: 'scale(1)' }
+                ], {
+                    duration: 220,
+                    easing: 'ease-out'
+                });
+                return;
+            }
+
+            const horizontalDistance = previousPosition.left - currentPosition.left;
+            const verticalDistance = previousPosition.top - currentPosition.top;
+            if (!horizontalDistance && !verticalDistance) return;
+
+            card.animate?.([
+                {
+                    transform: `translate(${horizontalDistance}px, ${verticalDistance}px)`
+                },
+                { transform: 'translate(0, 0)' }
+            ], {
+                duration: 320,
+                easing: 'cubic-bezier(.2, .8, .2, 1)'
+            });
+        });
+    });
+}
+
+function reorderPlaceCards(places, category, userLocation) {
+    const previousCards = [...placesList.children]
+        .filter((element) => element.classList.contains('place-card'));
+    const previousPositions = new Map();
+
+    previousCards.forEach((card) => {
+        card.getAnimations?.().forEach((animation) => animation.cancel());
+        previousPositions.set(card, card.getBoundingClientRect());
+    });
+
+    const cards = places.map((place) => (
+        placeCards.get(place) || createPlaceCard(place, category, userLocation)
+    ));
+    const activeCards = new Set(cards);
+
+    previousCards
+        .filter((card) => !activeCards.has(card))
+        .forEach((card) => card.remove());
+    cards.forEach((card) => placesList.append(card));
+
+    syncCardRowHeights();
+    animateCardReorder(previousPositions, cards);
+}
+
+function renderPlaceCards(places, category, userLocation, { animate = false } = {}) {
+    const sortedPlaces = sortPlaces(places, userLocation, selectedFilter).slice(0, 30);
+    const canAnimate = animate && placesList.dataset.state === 'results';
+
     placesList.dataset.state = places.length ? 'results' : 'empty';
     placesList.setAttribute('aria-busy', 'false');
 
-    const fragment = document.createDocumentFragment();
-    sortPlaces(places, userLocation, selectedFilter).slice(0, 30).forEach((place) => {
-        fragment.append(createPlaceCard(place, category, userLocation));
-    });
-    placesList.append(fragment);
-    showPlaces(places, userLocation, getPlaceCoordinates);
-    requestAnimationFrame(syncCardRowHeights);
+    if (canAnimate) {
+        reorderPlaceCards(sortedPlaces, category, userLocation);
+    } else {
+        cancelPendingCardReorder();
+        const fragment = document.createDocumentFragment();
+        sortedPlaces.forEach((place) => {
+            fragment.append(createPlaceCard(place, category, userLocation));
+        });
+        placesList.replaceChildren(fragment);
+        showPlaces(places, userLocation, getPlaceCoordinates);
+        requestAnimationFrame(syncCardRowHeights);
+    }
+
     updateFavoritesButton();
 }
 
-function renderFavoritePlaces() {
+function renderFavoritePlaces({ animate = false } = {}) {
     const currentLocation = getCurrentLocation();
-    const favorites = getFavorites();
-    const favoritePlaces = favorites.map(({ place }) => place);
+    if (!animate) {
+        currentFavoritePlaces = getFavorites().map(({ place }) => place);
+    }
 
-    renderPlaceCards(favoritePlaces, 'Favorites', currentLocation);
-    statusMessage.textContent = favoritePlaces.length
-        ? `Showing ${favoritePlaces.length} favorite places.`
+    renderPlaceCards(currentFavoritePlaces, 'Favorites', currentLocation, { animate });
+    statusMessage.textContent = currentFavoritePlaces.length
+        ? `Showing ${currentFavoritePlaces.length} favorite places.`
         : 'No favorite places saved yet.';
 }
 
@@ -354,6 +426,7 @@ async function fetchNearbyPlaces(category) {
         `Finding nearby ${category} places within ${selectedRadiusKm} km...`,
         'loading'
     );
+    cancelPendingCardReorder();
     placesList.textContent = '';
     placesList.dataset.state = 'loading';
     placesList.setAttribute('aria-busy', 'true');
@@ -445,9 +518,17 @@ filterButtons.forEach((button) => {
         });
 
         if (showingFavorites) {
-            renderFavoritePlaces();
-        } else if (selectedCategory) {
-            fetchNearbyPlaces(selectedCategory);
+            renderFavoritePlaces({ animate: true });
+        } else if (
+            currentPlacesCategory === selectedCategory
+            && placesList.dataset.state === 'results'
+        ) {
+            renderPlaceCards(
+                currentPlaces,
+                currentPlacesCategory,
+                getCurrentLocation(),
+                { animate: true }
+            );
         }
     });
 });
