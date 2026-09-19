@@ -1,4 +1,5 @@
-const storageKey = 'ashepashe-favorites';
+const storageKey = 'amarpashe-favorites';
+const legacyStorageKey = 'ashepashe-favorites';
 
 function getPlaceKey(place) {
     const properties = place.properties || {};
@@ -13,7 +14,15 @@ function getPlaceKey(place) {
 
 function readFavorites() {
     try {
-        return JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const savedFavorites = localStorage.getItem(storageKey);
+        if (savedFavorites) return JSON.parse(savedFavorites);
+
+        const legacyFavorites = localStorage.getItem(legacyStorageKey);
+        if (!legacyFavorites) return [];
+
+        const favorites = JSON.parse(legacyFavorites);
+        localStorage.setItem(storageKey, JSON.stringify(favorites));
+        return favorites;
     } catch (error) {
         return [];
     }

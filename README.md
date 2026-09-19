@@ -1,10 +1,10 @@
-# Ashe Pashe - Nearby Place Finder
+# Amar Pashe - Nearby Place Finder
 
 A lightweight browser-based app for discovering nearby places using the user's current location, category search, map visualization, and saved favorites. The app is built with plain HTML, CSS, and JavaScript, and it uses Geoapify for place data and Leaflet + OpenStreetMap for the map.
 
 ## Overview
 
-Ashe Pashe helps users find useful places around them such as restaurants, cafes, hospitals, pharmacies, hotels, universities, ATMs, and supermarkets. It uses browser geolocation to detect the user's position, searches nearby places within a selected radius, sorts results by distance/rating/status, and displays them in an easy-to-scan list with details like address, rating, opening hours, and map links.
+Amar Pashe helps users find useful places around them such as restaurants, cafes, hospitals, pharmacies, hotels, universities, ATMs, and supermarkets. It uses browser geolocation to detect the user's position, searches nearby places within a selected radius, sorts results by distance/rating/status, and displays them in an easy-to-scan list with details like address, rating, opening hours, and map links.
 
 ## Features
 
@@ -70,26 +70,15 @@ Ashe Pashe helps users find useful places around them such as restaurants, cafes
 - ATMs
 - Supermarkets
 
-## Local Setup
+## Deployment
 
-Because this is a static web app, you can run it with a simple local web server.
-
-### Option 1: Python
-
-```bash
-cd /path/to/nearby-place-finder
-python3 -m http.server 8000
-```
-
-Then open:
+The live app is deployed on Vercel:
 
 ```text
-http://localhost:8000
+https://amarpashe.vercel.app
 ```
 
-### Option 2: VS Code Live Server
-
-Open the project in VS Code and launch it with a local static server extension such as Live Server.
+Open the HTTPS URL on mobile to allow Chrome to provide location access. If Chrome previously denied access, open the site's permissions from the address bar, enable Location, and reload the page.
 
 ## API Configuration
 
@@ -104,8 +93,7 @@ If you want to use your own API key, replace the value in `place.js` with your p
 ## Notes
 
 - The app depends on browser geolocation permission.
-- On a phone, open the app through an HTTPS URL. Opening a computer's `localhost` from a phone or using a regular `http://` LAN URL will prevent Chrome from providing location access. Deploying to GitHub Pages, Vercel, or another HTTPS host is recommended.
-- If Chrome previously denied access, open the site's permissions from the address bar, enable Location, and reload the page.
+- The app must be opened through the HTTPS Vercel URL for mobile Chrome geolocation to work.
 - Without location access, the user cannot search for nearby places.
 - Some results may not include complete data such as ratings or opening hours depending on the provider data.
 - The app stores favorites in the browser using `localStorage`, so favorites persist on the same browser/device.
