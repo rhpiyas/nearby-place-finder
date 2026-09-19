@@ -114,4 +114,6 @@ This project is for personal and educational use unless otherwise specified by t
 
 ## Author
 
-Rakib Hasan Piyas
+Rakib Hasan Piyas  
+Department of Software Engineering  
+Daffodil International University
