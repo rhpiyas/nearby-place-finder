@@ -104,6 +104,8 @@ If you want to use your own API key, replace the value in `place.js` with your p
 ## Notes
 
 - The app depends on browser geolocation permission.
+- On a phone, open the app through an HTTPS URL. Opening a computer's `localhost` from a phone or using a regular `http://` LAN URL will prevent Chrome from providing location access. Deploying to GitHub Pages, Vercel, or another HTTPS host is recommended.
+- If Chrome previously denied access, open the site's permissions from the address bar, enable Location, and reload the page.
 - Without location access, the user cannot search for nearby places.
 - Some results may not include complete data such as ratings or opening hours depending on the provider data.
 - The app stores favorites in the browser using `localStorage`, so favorites persist on the same browser/device.

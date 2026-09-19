@@ -14,6 +14,7 @@
 body {
     margin: 0;
     min-width: 0;
+    overflow-x: hidden;
     color: var(--ink);
     background:
         linear-gradient(rgba(10, 27, 22, .34), rgba(10, 27, 22, .42)),
@@ -516,6 +517,146 @@ main > .result-filters h2 { margin-bottom: 12px; }
 
 .place-card a.place-map-link:hover {
     color: var(--accent);
+}
+
+@media (max-width: 640px) {
+    header, main {
+        width: min(100% - 20px, 1180px);
+    }
+
+    header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+        padding: 16px 0;
+    }
+
+    header p {
+        font-size: .78rem;
+    }
+
+    main {
+        padding: 18px 0 28px;
+    }
+
+    main > section:first-child,
+    nav,
+    main > .search-radius,
+    main > .result-filters,
+    main > .map-section,
+    main > section:last-child {
+        border-radius: 14px;
+    }
+
+    main > section:first-child {
+        margin-bottom: 14px;
+        padding: 20px 16px;
+    }
+
+    h1 {
+        font-size: 2.05rem;
+        letter-spacing: 0 !important;
+    }
+
+    main > section:first-child > p {
+        margin-bottom: 18px;
+        font-size: .94rem;
+    }
+
+    .location-action-row {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    #use-location-button,
+    #place-search-form button {
+        min-height: 48px;
+    }
+
+    #current-location {
+        min-height: 20px;
+        line-height: 1.4;
+    }
+
+    #place-search-form {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+        margin-top: 16px;
+        padding: 8px;
+    }
+
+    #place-search {
+        min-height: 44px;
+        padding: 0 10px;
+    }
+
+    nav,
+    main > .search-radius,
+    main > .result-filters,
+    main > .map-section,
+    main > section:last-child {
+        padding: 18px 16px;
+    }
+
+    nav ul,
+    .radius-options,
+    .filter-options {
+        gap: 8px;
+    }
+
+    nav li {
+        flex: 1 1 calc(50% - 8px);
+    }
+
+    nav button,
+    .radius-options button,
+    .filter-options button {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 8px;
+    }
+
+    nav li:last-child {
+        flex: 0 0 auto;
+    }
+
+    #favorites-button {
+        width: 58px;
+    }
+
+    .search-controls-row {
+        gap: 14px;
+        margin-top: 14px;
+        margin-bottom: 14px;
+    }
+
+    .map-heading-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .map-visibility-controls {
+        width: 100%;
+    }
+
+    .map-visibility-controls button {
+        flex: 1;
+        min-height: 44px;
+    }
+
+    #map {
+        min-height: 300px;
+        border-radius: 9px;
+    }
+
+    #places-list {
+        grid-template-columns: 1fr;
+    }
+
+    .place-card {
+        padding: 16px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

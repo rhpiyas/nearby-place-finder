@@ -51,21 +51,28 @@ async function handleLocationSuccess(position) {
 
 function handleLocationError(error) {
     const messages = {
-        1: 'Location permission was denied. Allow access to discover nearby places.',
-        2: 'Your location is currently unavailable. Please try again.',
-        3: 'Location request timed out. Please try again.'
+        1: 'Location permission was denied. Allow location access in Chrome site settings, then try again.',
+        2: 'Your location is currently unavailable. Turn on Location Services and try again.',
+        3: 'Location request timed out. Turn on GPS or move near a window, then try again.'
     };
 
     locationButton.disabled = false;
     locationButton.classList.remove('location-ready');
     locationButton.textContent = 'Use My Location';
     currentLocationElement.textContent = 'Location not selected';
-    statusMessage.textContent = messages[error.code] || 'Unable to access your location.';
+    statusMessage.textContent = messages[error.code]
+        || 'Unable to access your location. Check your browser and device location settings.';
 }
 
 function requestLocation() {
     if (!navigator.geolocation) {
         statusMessage.textContent = 'Geolocation is not supported by this browser.';
+        return;
+    }
+
+    if (!window.isSecureContext) {
+        statusMessage.textContent = 'Location needs HTTPS. Open this app from a secure website, not a file or regular HTTP link.';
+        currentLocationElement.textContent = 'Secure connection required';
         return;
     }
 
@@ -78,7 +85,7 @@ function requestLocation() {
     navigator.geolocation.getCurrentPosition(
         handleLocationSuccess,
         handleLocationError,
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+        { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 }
     );
 }
 
