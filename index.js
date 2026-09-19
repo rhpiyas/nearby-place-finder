@@ -461,13 +461,11 @@ favoritesButton.addEventListener('click', () => {
         return;
     }
 
-    showingFavorites = !showingFavorites;
-    if (showingFavorites) {
-        renderFavoritePlaces();
-    } else if (currentPlacesCategory) {
-        renderPlaceCards(currentPlaces, currentPlacesCategory, currentLocation);
-        statusMessage.textContent = `Found ${currentPlaces.length} nearby ${currentPlacesCategory} places within ${selectedRadiusKm} km.`;
-    }
+    if (showingFavorites) return;
+
+    showingFavorites = true;
+    clearSearchResults();
+    renderFavoritePlaces();
 });
 
 showMapButton.addEventListener('click', () => {
